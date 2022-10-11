@@ -12,10 +12,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 public class MoneyTransferTest {
-    int card1Balance1;
-    int card2Balance1;
-    int card1Balance2;
-    int card2Balance2;
     int sum;
     DashboardPage dashboardPage;
 
@@ -27,40 +23,52 @@ public class MoneyTransferTest {
         val verificationPage = loginPage.validLogin(authInfo);
         val verificationCode = DataHelper.getVerificationCodeFor(authInfo);
         dashboardPage = verificationPage.validVerify(verificationCode);
-        card1Balance1 = dashboardPage.getBalance(dashboardPage.card1);
-        card2Balance1 = dashboardPage.getBalance(dashboardPage.card2);
+
     }
 
     @Test
     void shouldTransferMoneyFromSecondToFirstCard() {
+        val firstCardBalanceBefore = dashboardPage.getFirstCardBalance();
+        val secondCardBalanceBefore = dashboardPage.getLastCardBalance();
         sum = 100;
-        val transferPage = dashboardPage.clickTransfer(dashboardPage.card1);
-        val cardNum = DataHelper.getSecondCard().getNumber();
-        val dashboardPage2 = transferPage.successfulTransfer(Integer.toString(sum), cardNum);
-        card1Balance2 = dashboardPage2.getBalance(dashboardPage2.card1);
-        card2Balance2 = dashboardPage2.getBalance(dashboardPage2.card2);
-        assertEquals(card1Balance1 + sum, card1Balance2);
-        assertEquals(card2Balance1 - sum, card2Balance2);
+        val transferPage = DashboardPage.clickToTransferCard1();
+        transferPage.validTransferToFirst(sum);
+        val firstCardBalanceAfter = DataHelper.getBalanceAfterReplenishment(firstCardBalanceBefore, sum);
+        val secondCardBalanceAfter = DataHelper.getBalanceAfterWritingOff(secondCardBalanceBefore, sum);
+        val firstCardCurrentBalance = dashboardPage.getFirstCardBalance();
+        val secondCardCurrentBalance = dashboardPage.getLastCardBalance();
+        assertEquals(firstCardBalanceAfter, firstCardCurrentBalance);
+        assertEquals(secondCardBalanceAfter, secondCardCurrentBalance);
     }
 
     @Test
     void shouldTransferMoneyFromFirstToSecondCard() {
+        val firstCardBalanceBefore = dashboardPage.getFirstCardBalance();
+        val secondCardBalanceBefore = dashboardPage.getLastCardBalance();
         sum = 100;
-        val transferPage = dashboardPage.clickTransfer(dashboardPage.card2);
-        val cardNum = DataHelper.getFirstCard().getNumber();
-        val dashboardPage2 = transferPage.successfulTransfer(Integer.toString(sum), cardNum);
-        card1Balance2 = dashboardPage2.getBalance(dashboardPage2.card1);
-        card2Balance2 = dashboardPage2.getBalance(dashboardPage2.card2);
-        assertEquals(card1Balance1 - sum, card1Balance2);
-        assertEquals(card2Balance1 + sum, card2Balance2);
+        val transferPage = DashboardPage.clickToTransferCard2();
+        transferPage.validTransferToSecond(sum);
+        val secondCardBalanceAfter = DataHelper.getBalanceAfterReplenishment(secondCardBalanceBefore, sum);
+        val firstCardBalanceAfter = DataHelper.getBalanceAfterWritingOff(firstCardBalanceBefore, sum);
+        val firstCardCurrentBalance = dashboardPage.getFirstCardBalance();
+        val secondCardCurrentBalance = dashboardPage.getLastCardBalance();
+        assertEquals(firstCardBalanceAfter, firstCardCurrentBalance);
+        assertEquals(secondCardBalanceAfter, secondCardCurrentBalance);
+    }
+
+
+    @Test
+    void shouldNotTransferMoreThanAvailableFromFirstCard() {
+        val firstCardBalanceBefore = dashboardPage.getFirstCardBalance();
+        sum = firstCardBalanceBefore + 100;
+        val transferPage = DashboardPage.clickToTransferCard2().unsuccessfulTransferCard1(sum);
     }
 
     @Test
-    void shouldNotTransferMoreThanAvailable() {
-        sum = card1Balance1 + 100;
-        val transferPage = dashboardPage.clickTransfer(dashboardPage.card2);
-        val cardNum = DataHelper.getFirstCard().getNumber();
-        transferPage.unsuccessfulTransfer(Integer.toString(sum), cardNum);
+    void shouldNotTransferMoreThanAvailableFromSecondCard() {
+        val secondCardBalanceBefore = dashboardPage.getLastCardBalance();
+        sum = secondCardBalanceBefore + 100;
+        val transferPage = DashboardPage.clickToTransferCard2().unsuccessfulTransferCard2(sum);
     }
 }
 

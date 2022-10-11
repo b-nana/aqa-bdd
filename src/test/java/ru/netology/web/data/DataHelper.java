@@ -31,22 +31,26 @@ public class DataHelper {
 
 
     @Value
-    public static class TransferInfo {
-        private String sum;
+    public static class CardNumber {
         private String cardNumber;
     }
 
-    @Value
-    public static class CardInfo {
-        private String number;
+    public static CardNumber getCard1() {
+        return new CardNumber("5559 0000 0000 0001");
     }
 
-    public static CardInfo getFirstCard() {
-        return new CardInfo("5559 0000 0000 0001");
+    public static CardNumber getCard2() {
+        return new CardNumber("5559 0000 0000 0002");
     }
 
-    public static CardInfo getSecondCard() {
-        return new CardInfo("5559 0000 0000 0002");
+    public static int getBalanceAfterWritingOff(int balance, int sum) {
+        int currentBalance = balance - sum;
+        return currentBalance;
+    }
+
+    public static int getBalanceAfterReplenishment(int balance, int sum) {
+        int currentBalance = balance + sum;
+        return currentBalance;
     }
 
 
