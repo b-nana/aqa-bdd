@@ -32,15 +32,16 @@ public class DataHelper {
 
     @Value
     public static class CardNumber {
+        private String id;
         private String cardNumber;
     }
 
     public static CardNumber getCard1() {
-        return new CardNumber("5559 0000 0000 0001");
+        return new CardNumber("0", "5559 0000 0000 0001");
     }
 
     public static CardNumber getCard2() {
-        return new CardNumber("5559 0000 0000 0002");
+        return new CardNumber("1", "5559 0000 0000 0002");
     }
 
     public static int getBalanceAfterWritingOff(int balance, int sum) {
